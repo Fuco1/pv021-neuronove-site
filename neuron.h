@@ -10,7 +10,7 @@ class Neuron {
 	private:
 		struct link {
 			double weight;
-			Neuron *neuron; //Neuron &neuron;
+			Neuron *neuron; //Neuron &neuron; -- Opravdu se tu mela pouzit reference misto ukazatele? Mne to prijde jako chyba, proto jsem to zakomentoval. Karel
 		};
 
 		vector<link> parents;
@@ -33,7 +33,7 @@ class Neuron {
 				double weightedSum = 0;
 				for (vector<link>::iterator i = parents.begin(); i != parents.end(); ++i) {
 					if (i->neuron == NULL) {
-						weightedSum += i->weight; // Return weight_0 * (x_0 = 1) if the link is NULL (the first parent will be linked to no neuron, it will be the bias, x_0)
+						weightedSum += i->weight; // Return weight_k * 1 if the link is NULL; this will be the case with the 0-th link, which will be representing the neuron's bias (x_0 = 1).
 					} else {
 						weightedSum += i->weight * i->neuron->get_output(); // Return weight_k * x_k
 					}

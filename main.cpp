@@ -1,5 +1,6 @@
 #include <iostream>
 #include "net.h"
+#include "image.h"
 
 using namespace std;
 
@@ -11,5 +12,7 @@ using namespace std;
  */
 int main(int argc, char **argv)
 {
+	Image<int> image("image1.dat");
+	Net<int> net;
 	return 0;
 }
