@@ -12,7 +12,7 @@ template <class VoxelType> class Net {
 	private:
 		vector<Neuron> neurons; // All neurons of this net.
 		Neuron *head; 
-    public:
+	public:
 		//TODO: constructor: Net(...);
 		double run(const Image<VoxelType> &img);
 		void train(const Image<VoxelType> &img, double exp_val);

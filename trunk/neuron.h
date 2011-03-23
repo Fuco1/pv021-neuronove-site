@@ -10,7 +10,7 @@ class Neuron {
 		struct link {
 			double weight;
 			Neuron *neuron; //NULL for biases
-        };
+		};
 
 		vector<link> parents;
 		double input; //relevant if this neuron represents a piece of input data
@@ -19,7 +19,7 @@ class Neuron {
 		//TODO: constructor: Neuron(...);
 		void set_input(double input);
 		void set_act_func(double (*act_func)(double));
-        
+		
 		double get_output(); //depends on outputs of its parents, weights, and an activation function
 };
 
