@@ -8,14 +8,14 @@
 
 using namespace std;
 
-class Net {
+template <class VoxelType> class Net {
 	private:
 		vector<Neuron> neurons;
 		Neuron& head;
 	public:
 		//TODO: constructor: Net(...);
-		bool run(const Image &img);
-		void train(const Image &img, bool exp_val);
+		bool run(const Image<VoxelType> &img);
+		void train(const Image<VoxelType> &img, bool exp_val);
 };
 
 #endif // NET_H_INCLUDED
