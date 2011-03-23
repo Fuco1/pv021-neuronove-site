@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# transforms <CR><LF> sequence to <LF>, for porting sources from windows to unix 
+for S in *.cpp *.h; do sed -i 's/\r//g' $S; done
