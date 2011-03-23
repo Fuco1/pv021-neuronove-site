@@ -1,7 +1,10 @@
+#ifndef NEURON_H_INCLUDED
+#define NEURON_H_INCLUDED
+
 #include <vector>
 #include <utility>
 
-using namespace std; 
+using namespace std;
 
 class Neuron {
 	private:
@@ -9,7 +12,7 @@ class Neuron {
 			double weight;
 			Neuron& parent;
 		};
-	
+
 		vector<link> parents;
 		double input; //relevant if this neuron is an input neuron
 		double (*act_func)(double); //pointer to an activation function
@@ -19,3 +22,5 @@ class Neuron {
 		void set_act_func(double (*act_func)(double));
 		double output(); //depends on outputs from its parents, weights, and an activation function
 };
+
+#endif // NEURON_H_INCLUDED

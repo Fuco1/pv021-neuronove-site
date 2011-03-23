@@ -1,8 +1,12 @@
+#ifndef NET_H_INCLUDED
+#define NET_H_INCLUDED
+
 #include <iostream>
 #include <vector>
 #include "neuron.h"
+#include "image.h"
 
-using namespace std; 
+using namespace std;
 
 class Net {
 	private:
@@ -10,6 +14,8 @@ class Net {
 		Neuron& head;
 	public:
 		//TODO: constructor: Net(...);
-		bool run(vector<vector<int> >& img);
-		void train(vector<vector<int> >& img, bool exp_val);
+		bool run(const Image &img);
+		void train(const Image &img, bool exp_val);
 };
+
+#endif // NET_H_INCLUDED
