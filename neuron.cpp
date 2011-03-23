@@ -22,7 +22,7 @@ double Neuron::get_output() {
 }
 
 void Neuron::set_input(double input) {
-	this->input = val;
+	this->input = input;
 }
 
 void Neuron::set_act_func(double (*act_func)(double)) {
