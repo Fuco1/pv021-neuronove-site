@@ -10,9 +10,9 @@ using namespace std;
  * 	-train <file path> - train a network on cases in the file and print the resulting network to stdout
  * 	-run <file path> - run a network on cases in the file; print the results to stdout
  */
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	Image<int> image("image1.dat");
 	Net<int> net;
+    Neuron neuron;
 	return 0;
 }
