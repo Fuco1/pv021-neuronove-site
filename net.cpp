@@ -1,17 +1,17 @@
 #include "net.h"
 
 double Neuron::run(const Image<VoxelType> &img) {
-    //TODO
+	//TODO
 }
 		
 void Neuron::train(const Image<VoxelType> &img, double exp_val) {
-    //TODO
+	//TODO
 }
 
 void Neuron::saveToFile(const std::string &fileName) {
-    //TODO
+	//TODO
 } 
 
 void Neuron::loadFromFile(const std::string &fileName) {
-    //TODO
+	//TODO
 }
