@@ -1,5 +1,6 @@
 #include "neuron.h"
 
+/*
 double Neuron::get_output() {
 	// If this neuron has no parent...
 	if (parents.size() == 0) {
@@ -20,11 +21,4 @@ double Neuron::get_output() {
 		return act_func(weightedSum);
 	}
 }
-
-void Neuron::set_input(double input) {
-	this->input = input;
-}
-
-void Neuron::set_act_func(double (*act_func)(double)) {
-	this->act_func = act_func;
-}
+*/
