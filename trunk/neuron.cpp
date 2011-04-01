@@ -1,24 +1,23 @@
+#include <cstdlib>
+
+#include "net.h"
 #include "neuron.h"
 
-/*
-double Neuron::get_output() {
-	// If this neuron has no parent...
-	if (parents.size() == 0) {
-		// ...just return the value (parent-less neurons work as input).
-		return input;
-	// Otherwise...
-	} else {
-		// ...calculate the weighted sum of its inputs...
-		double weightedSum = 0;
-		for (vector<link>::iterator i = parents.begin(); i != parents.end(); ++i) {
-			if (i->neuron == NULL) {
-				weightedSum += i->weight; // Return weight_k * 1 if the link is NULL; this will be the case with the 0-th link, which will be representing the neuron's bias (x_0 = 1).
-			} else {
-				weightedSum += i->weight * i->neuron->get_output(); // Return weight_k * x_k
-			}
-		}
-		// ...and apply the activation function.
-		return act_func(weightedSum);
+void Neuron::propagateValueToUpperLayer(void) {
+	// We can't propagate above the topmost layer.
+	if (indexOfThisNeuronsLayer >= thisNeuronsNetwork->layers.size()) {
+		return;
 	}
+
+	// Get the output value of this neuron.
+	double value = getValue();
+
+	// For all neurons in the layer above us...
+	for (size_t i = 0; i < thisNeuronsNetwork->layers[indexOfThisNeuronsLayer + 1].size(); ++i) {
+		// ...pick the neuron...
+		Neuron *targetNeuron = &(thisNeuronsNetwork->layers[indexOfThisNeuronsLayer + 1][i]);
+		// ...and increase its potential by our output value, with the weight the target neuron has for us.
+		targetNeuron->setPotential(targetNeuron->getPotential() + value * targetNeuron->inputWeights[indexOfThisNeuronInItsLayer + 1]);
+	}
+
 }
-*/

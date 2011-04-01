@@ -3,49 +3,77 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
+
 #include "neuron.h"
 #include "image.h"
 
-using namespace std;
+typedef std::vector<Neuron> Layer;
 
-typedef vector<Neuron> Layer;
+double actFuncTanh(double potential);
 
-template <class VoxelType> class Net {
-	private:
-		vector<Layer> layers; // All neurons of this net.
+class Net {
 	public:
-		//TODO: constructor: Net(...);
-		double run(const Image<VoxelType> &img) {
-			// set all potentials to 0
-      for (size_t l = 0; l < layers.size(); ++l) {
-				for (size_t n = 0; n < layers[l].size(); ++n) {
-					layers[l][n].setPotential(0);
+		std::vector<Layer> layers; // All neurons of this net.
+	public:
+		// \todo Constructor
+		Net(const std::vector<size_t> &neuronCounts) {
+			Layer currentLayer;
+			for (size_t i = 0; i < neuronCounts.size(); ++i) {
+				currentLayer.clear();
+				for (size_t j = 0; j < neuronCounts[i]; ++j) {
+					Neuron currentNeuron(this, i, j, (i == 0) ? (0) : (neuronCounts[i - 1]), &actFuncTanh);
+					currentLayer.push_back(currentNeuron);
 				}
-      }
-
-      // set potentials in layer 0 according to input
-			for (size_t n = 0; n < layers[0].size(); ++n) {
-				layers[0][n].setPotential(0/*some value read from the input image*/);
+				layers.push_back(currentLayer);
 			}
-
-      // propagate from layer 0 upwards
-      for (size_t l = 0; l < layers.size() - 1; ++l) {
-				for (size_t n = 0; n < layers[l].size(); ++n) {
-					layers[l][n].propagateValueToUpperLayer();
-				}
-      }
-
-      // the potentials of the last layer have been set. apply their activation function and we have the result
 		};
 
 
-		void train(const Image<VoxelType> &img, double exp_val); // will call run() as one step
 
+		double run(const Image<double> &image) {
+			if (image.getSize() != layers[0].size()) {
+				std::cerr << "error: Wrong image size" << std::endl;
+				exit(1);
+			}
+
+			// Initialize all potentials (either to the neuron's bias, or -- in the case of input neurons -- to the corresponding input value).
+      for (size_t layerIndex = 0; layerIndex < layers.size(); ++layerIndex) {
+				for (size_t neuronIndex = 0; neuronIndex < layers[layerIndex].size(); ++neuronIndex) {
+					if (layerIndex == 0) {
+						layers[layerIndex][neuronIndex].setPotential(image.getVoxel(neuronIndex));
+					} else {
+						layers[layerIndex][neuronIndex].setPotential(layers[layerIndex][neuronIndex].getInputWeight(0));
+					}
+				}
+      }
+
+      // Propagate the values from layer 0 upwards.
+      for (size_t layerIndex = 0; layerIndex < layers.size() - 1; ++layerIndex) {
+				for (size_t neuronIndex = 0; neuronIndex < layers[layerIndex].size(); ++neuronIndex) {
+					layers[layerIndex][neuronIndex].propagateValueToUpperLayer();
+				}
+      }
+
+      // All potentials have been set; return the value of the output neuron.
+      double returnValue = layers[layers.size() - 1][0].getValue();
+      std::cout << "Run finished with return value = " << returnValue << std::endl;
+      return returnValue;
+		};
+
+
+		void train(const Image<double> &img, double expectedValue); // will call run() as one step
+
+		// \todo Save the net to a file.
 		void saveToFile(const std::string &fileName) {
-		}; // \todo Save the net to a file.
+		};
+
+		// \todo Load the net from a file.
 		void loadFromFile(const std::string &fileName) {
-		};// \todo Load the net from a file.
+		};
 
 };
+
+
 
 #endif // NET_H_INCLUDED
