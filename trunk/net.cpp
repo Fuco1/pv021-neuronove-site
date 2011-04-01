@@ -1,5 +1,9 @@
+#include "cmath"
 #include "net.h"
 
 double actFuncTanh(double potential) {
-	return potential; // \todo nahradit tuhle provizorni identitu skutecnou aktivacni funkci tanh
+	const double a = 1.7159;
+	const double b = 2.0/3.0;
+
+	return a * tanh(b * potential);
 };
