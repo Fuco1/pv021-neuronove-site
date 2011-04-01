@@ -18,8 +18,15 @@ using namespace std;
  a.exe -loadnet network.dat -run ./realdata                                              // nacte sit, provede vypocty nad realnymi daty
  */
 int main(int argc, char **argv) {
-	Image<int> image("image1.dat");
-	Net<int> net;
-	Neuron neuron;
+	Image<double> image("image1.dat");
+
+	std::vector<size_t> neuronCounts;
+	neuronCounts.push_back(image.getSize());
+	neuronCounts.push_back(20);
+	neuronCounts.push_back(1);
+	Net net(neuronCounts);
+
+	net.run(image);
+
 	return 0;
 }
