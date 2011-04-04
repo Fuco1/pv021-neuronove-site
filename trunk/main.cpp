@@ -17,16 +17,29 @@ using namespace std;
  a.exe -loadnet network.dat -savenet network.dat -train ./positives ./negatives          // nacte sit, vytrenuje a ulozi pod stejnym nazvem
  a.exe -loadnet network.dat -run ./realdata                                              // nacte sit, provede vypocty nad realnymi daty
  */
+
+// Returns the vector of all filenames in the given directory
+std::vector<std::string> getFileNames(const std::string &directoryName) {
+	std::vector<std::string> fileNames;
+	#ifdef WIN_32
+  // \todo windows
+	#else
+  // \todo unix
+	#endif
+	return fileNames;
+}
+
 int main(int argc, char **argv) {
 	Image<double> image("image1.dat");
 
 	std::vector<size_t> neuronCounts;
 	neuronCounts.push_back(image.getSize());
-	neuronCounts.push_back(20);
+	neuronCounts.push_back(20/* \todo determine the best number of hidden neurons */);
 	neuronCounts.push_back(1);
 	Net net(neuronCounts);
 
 	net.run(image);
+
 
 	return 0;
 }

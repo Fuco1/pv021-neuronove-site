@@ -48,7 +48,7 @@ template <class VoxelType> class Image {
 			data.resize(width * height * depth);
 
 			for (size_t i = 0; i < data.size(); ++i) {
-				data[i] = 0; // \todo Read the value of the i-th voxel.
+				data[i] = 0.1; // \todo Read the value of the i-th voxel.
 			}
 		}
 
