@@ -62,7 +62,7 @@ class Net {
 		};
 
 
-		void train(const Image<double> &img, double expectedValue); // will call run() as one step
+		void train(const Image<double> &img, double expectedValue); // will call run() as one (probably the first) step
 
 		// \todo Save the net to a file.
 		void saveToFile(const std::string &fileName) {
