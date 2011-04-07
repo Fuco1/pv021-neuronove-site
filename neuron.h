@@ -1,7 +1,6 @@
 #ifndef NEURON_H_INCLUDED
 #define NEURON_H_INCLUDED
 
-
 #include <vector>
 
 class Net;
@@ -11,7 +10,6 @@ class Neuron {
 		Net *thisNeuronsNetwork; // Pointer to the network owning this neuron.
 		size_t indexOfThisNeuronsLayer; // 0 for neurons in the input (0th) layer, 1 for neurons in the 1st layer, ...
 		size_t indexOfThisNeuronInItsLayer; // 0 for the 1st neuron of a layer, 1 for the 2nd neuron, ...
-
 
 		std::vector<double> inputWeights; // Bias and the weights of individual inputs of this neuron. The number of inputs of each neuron is equal to the number of neurons in the layer below it.
 
@@ -65,6 +63,10 @@ class Neuron {
 		// Returns the input weight with the specified index (when indexOfInputWeight == 0, the function returns the bias of this neuron).
 		double getInputWeight(size_t indexOfInputWeight) {
 			return inputWeights[indexOfInputWeight];
+		}
+		
+		size_t getInputWeightsSize() {
+			return inputWeights.size();
 		}
 
 		// Sets the input weight with the specified index (when indexOfInputWeight == 0, the function sets the bias of this neuron).
