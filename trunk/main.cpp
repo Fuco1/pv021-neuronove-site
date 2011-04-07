@@ -37,9 +37,19 @@ int main(int argc, char **argv) {
 	neuronCounts.push_back(20/* \todo determine the best number of hidden neurons */);
 	neuronCounts.push_back(1);
 	Net net(neuronCounts);
+	
+	/*
+	Net net;
 
+	if (!net.loadFromFile("./test.net")) {
+		cerr << "File does not exist. Bye bye." << endl;
+		exit(1);
+	}
+	*/	
+	
 	net.run(image);
 
+	//net.saveToFile("./test.net");
 
 	return 0;
 }
