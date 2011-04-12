@@ -3,6 +3,8 @@
 
 #include <vector>
 
+typedef double(*actFuncPtr)(double);
+
 class Net;
 
 class Neuron {
@@ -77,7 +79,12 @@ class Neuron {
 		// Sets the activation function.
 		void setActFunc(double (*newActFunc)(double)) {
 			actFunc = newActFunc;
-		};
+		}
+
+		// get pointer to an activation function
+		actFuncPtr getActFunc() {
+			return actFunc;
+		}
 
 		void propagateValueToUpperLayer(void);
 };
