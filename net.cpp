@@ -2,6 +2,7 @@
 #include "net.h"
 #include <iostream>
 #include <fstream>
+#include <map>
 
 using namespace std;
 
@@ -19,13 +20,18 @@ double actFuncTanh(double potential) {
  */
 void Net::saveToFile(const char* fileName) {
 	ofstream file(fileName);
+	map<double (*)(double), string> fun2name;
+	fun2name[actFuncTanh] = "tanh";
+
 	file << this->layers.size() << endl;
 	for (size_t x = 0; x < this->layers.size(); ++x) {
 		file << this->layers[x].size() << endl;
 	}
+
 	for (size_t x = 0; x < this->layers.size(); ++x) {
 		for (size_t y = 0; y < this->layers[x].size(); ++y) {
 			Neuron &neuron = this->layers[x][y];
+			file << fun2name[neuron.getActFunc()] << " ";
 			for (size_t z = 0; z < neuron.getInputWeightsSize(); ++z) {
 				file << neuron.getInputWeight(z) << " ";
 			}
@@ -42,20 +48,27 @@ void Net::saveToFile(const char* fileName) {
  * Returns: false if the file does not exist
  */
 bool Net::loadFromFile(const char* fileName) {
-	ifstream file(fileName);
-	if (file.fail()) return false;
-	size_t ilayers;
-	file >> ilayers;
+	map<string, double (*)(double)> name2fun;
+	name2fun["tanh"] = &actFuncTanh;
 	vector<size_t> neuronCounts;
+	ifstream file(fileName);
+	size_t ilayers;
+	
+	if (file.fail()) return false;
+	file >> ilayers;
 	for (size_t x = 0; x < ilayers; ++x) {
 		size_t ineurons;
 		file >> ineurons;
 		neuronCounts.push_back(ineurons);
 	}
+
 	this->init(neuronCounts);
 	for (size_t x = 0; x < this->layers.size(); ++x) {
 		for (size_t y = 0; y < this->layers[x].size(); ++y) {
 			Neuron &neuron = this->layers[x][y];
+			string actFuncName;
+			file >> actFuncName;
+			neuron.setActFunc(name2fun[actFuncName]);
 			for (size_t z = 0; z < neuron.getInputWeightsSize(); ++z) {
 				double weight;
 				file >> weight;
