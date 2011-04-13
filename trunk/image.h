@@ -25,19 +25,39 @@ template <class VoxelType> class Image {
 			return width * height * depth;
 		};
 
-		// Image constructor.
+		// Parametric constructor.
+		Image(size_t aWidth, size_t aHeight, size_t aDepth) {
+			width = aWidth;
+			height = aHeight;
+			depth = aDepth;
+			data.resize(width * height * depth);
+		}
+
+		// Load from file constructor.
 		Image(const std::string &fileName) {
 			loadFromFile(fileName);
 		}
 
+		// Get the value of a voxel with the specific index.
 		VoxelType getVoxel(size_t i) const {
 			return data[i];
 		}
 
-		// Read the value of a voxel with the specific coords.
+		// Get the value of a voxel with the specific coords.
 		VoxelType getVoxel(size_t x, size_t y, size_t z) const {
 			return data[x + getWidth() * y + getWidth() * getHeight() * z];
 		}
+
+		// Set the value of a voxel with the specific index.
+		void setVoxel(size_t i, VoxelType value) {
+			data[i] = value;
+		}
+
+		// Set the value of a voxel with the specific coords.
+		void setVoxel(size_t x, size_t y, size_t z, VoxelType value) {
+			data[x + getWidth() * y + getWidth() * getHeight() * z] = value;
+		}
+
 
 		// \todo Load the image from a fie.
 		void loadFromFile(const std::string &fileName) {
