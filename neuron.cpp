@@ -3,6 +3,11 @@
 #include "net.h"
 #include "neuron.h"
 
+double randPlusMinusOne() {
+	const int precision = 10000; // Specifies the precision of the randomly generated number.
+	return (rand() % (precision + 1) - precision / 2) / double(precision / 2);
+}
+
 void Neuron::propagateValueToUpperLayer(void) {
 	// We can't propagate above the topmost layer.
 	if (indexOfThisNeuronsLayer >= thisNeuronsNetwork->layers.size()) {
