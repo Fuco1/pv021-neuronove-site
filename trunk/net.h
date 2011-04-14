@@ -4,13 +4,44 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <map>
 
 #include "neuron.h"
 #include "image.h"
 
-typedef std::vector<Neuron> Layer;
+// layer specification
+struct LayerSpec {
+	size_t neuronCnt;
+	actFuncPtr actFunc; 
 
+	LayerSpec() {}
+	LayerSpec(size_t neuronCnt, actFuncPtr actFunc) {
+		this->neuronCnt = neuronCnt;
+		this->actFunc = actFunc;
+	}
+};
+
+// activation function list
 double actFuncTanh(double potential, bool diff);
+double actFuncId(double potential, bool diff);
+
+// function_ptr -> function_name, and vice versa
+struct FunTranslator {
+	std::map<actFuncPtr, std::string> fun2name;
+	std::map<std::string, actFuncPtr> name2fun;
+	
+	FunTranslator() {
+		fun2name[actFuncId] = "id";
+		name2fun["id"] = actFuncId;
+		fun2name[actFuncTanh] = "tanh";
+		name2fun["tanh"] = actFuncTanh;
+	}
+}; 
+
+extern FunTranslator funTranslator;
+
+// layer corresponding to its specification
+typedef std::vector<Neuron> Layer;
 
 const double learningSpeed = 0.05;
 
@@ -19,23 +50,23 @@ class Net {
 		std::vector<Layer> layers; // All neurons of this net.
 	public:
 		// shared code for constructors
-		void init(const std::vector<size_t> &neuronCounts) {
+		void init(const std::vector<LayerSpec> &netSpec) {
 			Layer currentLayer;
-			for (size_t i = 0; i < neuronCounts.size(); ++i) {
+			for (size_t i = 0; i < netSpec.size(); ++i) {
 				currentLayer.clear();
-				for (size_t j = 0; j < neuronCounts[i]; ++j) {
-					Neuron currentNeuron(this, i, j, (i == 0) ? (0) : (neuronCounts[i - 1]), &actFuncTanh);
+				for (size_t j = 0; j < netSpec[i].neuronCnt; ++j) {
+					int parentCnt = (i == 0) ? (0) : (netSpec[i- 1].neuronCnt);
+					Neuron currentNeuron(this, i, j, parentCnt, netSpec[i].actFunc);
 					currentLayer.push_back(currentNeuron);
 				}
 				layers.push_back(currentLayer);
 			}
 		}
 
-		// nonparametric constructor
-		Net() {}
+		Net() {} // nonparametric constructor
 
-		Net(const std::vector<size_t> &neuronCounts) {
-			init(neuronCounts);
+		Net(const std::vector<LayerSpec> &netSpec) {
+			init(netSpec);
 		}
 
 		double run(const Image<double> &image) {
@@ -76,9 +107,9 @@ class Net {
 			run(image);
 
 			// \todo Calculate the delta value for the output neuron.
-      layers[layers.size() - 1][0].setDelta(expectedValue - layers[layers.size() - 1][0].getValue());
+			layers[layers.size() - 1][0].setDelta(expectedValue - layers[layers.size() - 1][0].getValue());
 
-      // \todo Backpropagation.
+			// \todo Backpropagation.
 			for (int layerIndex = layers.size() - 2; layerIndex >= 0; --layerIndex) {
 				for (size_t neuronIndex = 0; neuronIndex < layers[layerIndex].size(); ++neuronIndex) {
 // \todo Ktera z nasledujicich dvou variant je spravne (pokud vubec)? Tu derivaci aktivacni funkce (actFuncDiff) mame
@@ -95,7 +126,7 @@ class Net {
 					double sum = 0;
 					for (size_t neuronInUpperLayerIndex = 0; neuronInUpperLayerIndex < layers[layerIndex+1].size(); ++neuronInUpperLayerIndex) {
 						sum +=   layers[layerIndex+1][neuronInUpperLayerIndex].getDelta() * layers[layerIndex+1][neuronInUpperLayerIndex].getInputWeight(neuronIndex)
-						       * layers[layerIndex+1][neuronInUpperLayerIndex].actFuncDiff(layers[layerIndex+1][neuronInUpperLayerIndex].getPotential());
+						       * layers[layerIndex+1][neuronInUpperLayerIndex].getActFunc()(layers[layerIndex+1][neuronInUpperLayerIndex].getPotential(), true);
 					}
 					layers[layerIndex][neuronIndex].setDelta(sum);
 #else
@@ -108,7 +139,7 @@ class Net {
 				}
 			}
 
-      // \todo Update the weights according to the delta values.
+			// \todo Update the weights according to the delta values.
 			for (size_t layerIndex = 1; layerIndex < layers.size(); ++layerIndex) {
 				for (size_t neuronIndex = 0; neuronIndex < layers[layerIndex].size(); ++neuronIndex) {
 					for (size_t inputWeightIndex = 0; inputWeightIndex < layers[layerIndex][neuronIndex].getInputWeightsSize(); ++inputWeightIndex) {

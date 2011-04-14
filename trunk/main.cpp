@@ -33,12 +33,6 @@ std::vector<std::string> getFileNames(const std::string &directoryName) {
 int main(int argc, char **argv) {
 	Image<double> image("image1.dat");
 
-	std::vector<size_t> neuronCounts;
-	neuronCounts.push_back(1/*image.getSize()*/);
-	neuronCounts.push_back(2/* \todo determine the best number of hidden neurons */);
-	neuronCounts.push_back(1);
-	Net net(neuronCounts);
-
 	/*
 	Net net;
 
@@ -48,40 +42,39 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	//net.run(image);
-
-
-
-
+	std::vector<LayerSpec> netSpec;
+	netSpec.push_back(LayerSpec(1, funTranslator.name2fun["id"]));
+	netSpec.push_back(LayerSpec(2, funTranslator.name2fun["tanh"]));
+	netSpec.push_back(LayerSpec(1, funTranslator.name2fun["tanh"]));
+	Net net(netSpec);
 
 	// Prepare training data.
 	std::vector<pair<Image<double>, double> > examples;
-  for (size_t i = 0; i < 10000; ++i) {
-  	Image<double> example(1, 1, 1);
-  	double value = randPlusMinusOne();
-  	example.setVoxel(0, value);
-  	//examples.push_back(make_pair(example, value >= 0 ? 1 : -1));
-  	examples.push_back(make_pair(example, (value*value)));
-  }
+	for (size_t i = 0; i < 10000; ++i) {
+		Image<double> example(1, 1, 1);
+		double value = randPlusMinusOne();
+		example.setVoxel(0, value);
+		//examples.push_back(make_pair(example, value >= 0 ? 1 : -1));
+		examples.push_back(make_pair(example, (value*value)));
+	}
 
-  // \todo Train.
-  const size_t trainingIterationCount = 100;
-  for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
-  	for (size_t exampleIndex = 0; exampleIndex < examples.size(); ++exampleIndex) {
-  		net.train(examples[exampleIndex].first, examples[exampleIndex].second);
-  	}
-  }
+	// \todo Train.
+	const size_t trainingIterationCount = 100;
+	for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
+		for (size_t exampleIndex = 0; exampleIndex < examples.size(); ++exampleIndex) {
+			net.train(examples[exampleIndex].first, examples[exampleIndex].second);
+		}
+	}
 
 	std::cout << net;
 
-
 	// Train.
 	double inputValue;
-  /*
+ 	/*
 	double expectedOutput;
-  do {
+  	do {
 		std::cout << net;
-  	Image<double> input(1, 1, 1);
+  		Image<double> input(1, 1, 1);
 
 		std::cout << "enter a value: ";
 		std::cin >> inputValue;
@@ -91,21 +84,22 @@ int main(int argc, char **argv) {
 		std::cin >> expectedOutput;
   	input.setVoxel(0, inputValue);
 		net.train(input, expectedOutput);
-  } while (inputValue != 0);
+	} while (inputValue != 0);
 	std::cout << net;
-  */
+ 	*/
 
 	// Test on non-training data.
 	//double inputValue;
-  do {
+	do {
 		std::cout << "enter a value: ";
-		std::cin >> inputValue;
-  	Image<double> input(1, 1, 1);
-  	input.setVoxel(0, inputValue);
+		if (!(std::cin >> inputValue)) break;
+		Image<double> input(1, 1, 1);
+		input.setVoxel(0, inputValue);
+		std::cout << "value * value is " << inputValue * inputValue << std::endl;
 		std::cout << "net output is " << net.run(input) << std::endl;
-  } while (inputValue != 0);
+	} while (inputValue != 0);
 
-	//net.saveToFile("./test.net");
+	net.saveToFile("./test.net");
 
 	return 0;
 }

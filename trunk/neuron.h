@@ -2,6 +2,7 @@
 #define NEURON_H_INCLUDED
 
 #include <vector>
+#include "net.h"
 
 typedef double(*actFuncPtr)(double, bool);
 
