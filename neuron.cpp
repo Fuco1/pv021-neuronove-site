@@ -24,5 +24,4 @@ void Neuron::propagateValueToUpperLayer(void) {
 		// ...and increase its potential by our output value, with the weight the target neuron has for us.
 		targetNeuron->setPotential(targetNeuron->getPotential() + value * targetNeuron->inputWeights[indexOfThisNeuronInItsLayer + 1]);
 	}
-
 }

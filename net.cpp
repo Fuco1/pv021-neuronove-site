@@ -1,12 +1,15 @@
-#include "cmath"
-#include "net.h"
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <map>
+#include "net.h"
 
 #define SQR(x) ((x)*(x))
 
 using namespace std;
+
+// one instance of Funtranslator to be shared among all cpp files
+FunTranslator funTranslator;
 
 // Activation function "1.7159*tanh(2.0/3.0*x)" and its derivative.
 double actFuncTanh(double potential, bool diff) {
@@ -20,6 +23,15 @@ double actFuncTanh(double potential, bool diff) {
 	}
 }
 
+// identity for input neurons to use
+double actFuncId(double potential, bool diff) {
+	if (diff) {
+		return 1;
+	} else {
+		return potential;
+	}
+}
+
 /*
  * Save the net to a file.
  * Params:
@@ -27,24 +39,24 @@ double actFuncTanh(double potential, bool diff) {
  */
 void Net::saveToFile(const char* fileName) {
 	ofstream file(fileName);
-	map<double (*)(double, bool), string> fun2name;
-	fun2name[actFuncTanh] = "tanh";
 
 	file << this->layers.size() << endl;
 	for (size_t x = 0; x < this->layers.size(); ++x) {
-		file << this->layers[x].size() << endl;
+		file << this->layers[x].size() << " ";
+		// take an activation function of a layer representant 
+		actFuncPtr actFunc = this->layers[x][0].getActFunc();
+		// store its name to file
+		file << funTranslator.fun2name[actFunc] << endl;
 	}
 
 	for (size_t x = 0; x < this->layers.size(); ++x) {
 		for (size_t y = 0; y < this->layers[x].size(); ++y) {
 			Neuron &neuron = this->layers[x][y];
-			file << fun2name[neuron.getActFunc()] << " ";
 			for (size_t z = 0; z < neuron.getInputWeightsSize(); ++z) {
 				file << neuron.getInputWeight(z) << " ";
 			}
 			file << endl;
 		}
-		file << "-----" << endl;
 	}
 }
 
@@ -55,35 +67,31 @@ void Net::saveToFile(const char* fileName) {
  * Returns: false if the file does not exist
  */
 bool Net::loadFromFile(const char* fileName) {
-	map<string, double (*)(double, bool)> name2fun;
-	name2fun["tanh"] = &actFuncTanh;
-	vector<size_t> neuronCounts;
+	vector<LayerSpec> netSpec;
 	ifstream file(fileName);
-	size_t ilayers;
+	size_t layerCnt;
 
 	if (file.fail()) return false;
-	file >> ilayers;
-	for (size_t x = 0; x < ilayers; ++x) {
-		size_t ineurons;
-		file >> ineurons;
-		neuronCounts.push_back(ineurons);
+	file >> layerCnt;
+	for (size_t x = 0; x < layerCnt; ++x) {
+		string actFuncName;
+		LayerSpec layerSpec;
+		file >> layerSpec.neuronCnt;
+		file >> actFuncName;
+		layerSpec.actFunc = funTranslator.name2fun[actFuncName];
+		netSpec.push_back(layerSpec);
 	}
 
-	this->init(neuronCounts);
+	this->init(netSpec);
 	for (size_t x = 0; x < this->layers.size(); ++x) {
 		for (size_t y = 0; y < this->layers[x].size(); ++y) {
 			Neuron &neuron = this->layers[x][y];
-			string actFuncName;
-			file >> actFuncName;
-			neuron.setActFunc(name2fun[actFuncName]);
 			for (size_t z = 0; z < neuron.getInputWeightsSize(); ++z) {
 				double weight;
 				file >> weight;
 				neuron.setInputWeight(z, weight);
 			}
 		}
-		string delimiter;
-		file >> delimiter;
 	}
 	return true;
 }
@@ -92,10 +100,8 @@ std::ostream& operator <<(std::ostream &os, const Net &net) {
 	for (size_t layerIndex = 0; layerIndex < net.layers.size(); ++layerIndex) {
 		for (size_t neuronIndex = 0; neuronIndex < net.layers[layerIndex].size(); ++neuronIndex) {
 			os << "layer " << layerIndex << ", neuron " << neuronIndex << " (bias and " << net.layers[layerIndex][neuronIndex].getInputWeightsSize() - 1 << " inputs): ";
-			if (layerIndex > 0) {
-				for (size_t inputWeightIndex = 0; inputWeightIndex < net.layers[layerIndex][neuronIndex].getInputWeightsSize(); ++inputWeightIndex) {
-					os << net.layers[layerIndex][neuronIndex].getInputWeight(inputWeightIndex) << " ";
-				}
+			for (size_t inputWeightIndex = 0; inputWeightIndex < net.layers[layerIndex][neuronIndex].getInputWeightsSize(); ++inputWeightIndex) {
+				os << net.layers[layerIndex][neuronIndex].getInputWeight(inputWeightIndex) << " ";
 			}
 			os << std::endl;
 		}
