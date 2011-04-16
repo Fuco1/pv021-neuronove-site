@@ -52,38 +52,38 @@ void warning(const char* message, ...) {
 }
 
 void error(const char* message, ...) {
-    va_list args;
-    fprintf(stderr, "Error: ");
-    va_start(args, message);
-    vfprintf(stderr, message, args);
-    va_end(args);
-    fprintf(stderr, "\n");
-	 exit(1);
+	va_list args;
+	fprintf(stderr, "Error: ");
+	va_start(args, message);
+	vfprintf(stderr, message, args);
+	va_end(args);
+	fprintf(stderr, "\n");
+	exit(1);
 }
 
 void printHelp() {
 	cerr << "Program options:\n"
-	"-c, --createnet <x0>:<func0>,<x1>:<func1>,<x2>:<func2>,...\n"
-	"	create a network with <xi> neurons in i-th layer such that\n"
-	"	i-th layer uses <funci>, which is name of an activation function\n"
-	"	identity funcion (id) should be used for 0-th layer\n"
-	"-l, --loadnet <file path>\n"
-	"	load a network from the file\n"
-	"-s, --savenet <file path>\n"
-	"	save the network to the file\n"
-	"	if not specified, the network is printed to stdout\n"
-	"-t, --train <file path>\n"
-	"	train a network on train cases in the file/directory\n"
-	"-i, --iters <x>\n"
-	"	number of training iterations over the whole data set\n"
-	"	default value is 1\n"
-	"-x, --rate <x>\n"
-	"	learning rate to be used for training\n"
-	"	default value is 0.05\n"
-	"-r, --run <file path>\n"
-	"	run an already trained network on real cases in the file/directory\n"
-	"-h, --help\n"
-	"	print this help\n";
+		"-c, --createnet <x0>:<func0>,<x1>:<func1>,<x2>:<func2>,...\n"
+		"	create a network with <xi> neurons in i-th layer such that\n"
+		"	i-th layer uses <funci>, which is name of an activation function\n"
+		"	identity funcion (id) should be used for 0-th layer\n"
+		"-l, --loadnet <file path>\n"
+		"	load a network from the file\n"
+		"-s, --savenet <file path>\n"
+		"	save the network to the file\n"
+		"	if not specified, the network is printed to stdout\n"
+		"-t, --train <file path>\n"
+		"	train a network on train cases in the file/directory\n"
+		"-i, --iters <x>\n"
+		"	number of training iterations over the whole data set\n"
+		"	default value is 1\n"
+		"-x, --rate <x>\n"
+		"	learning rate to be used for training\n"
+		"	default value is 0.05\n"
+		"-r, --run <file path>\n"
+		"	run an already trained network on real cases in the file/directory\n"
+		"-h, --help\n"
+		"	print this help\n";
 }
 
 // stores values into global userOptions structure
@@ -106,11 +106,10 @@ void parseCmdLine(int argc, char **argv) {
 		int option_index = 0;
 
 		c = getopt_long (argc, argv, "c:l:s:t:i:x:r:",
-						long_options, &option_index);
+					long_options, &option_index);
 
 		/* Detect the end of the options. */
-		if (c == -1)
-			break;
+		if (c == -1) break;
 
 		string item, first, second;
 		stringstream ssline, ssitem;
