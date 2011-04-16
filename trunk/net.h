@@ -26,9 +26,11 @@ double actFuncTanh(double potential, bool diff);
 double actFuncId(double potential, bool diff);
 
 // function_ptr -> function_name, and vice versa
-struct FunTranslator {
+extern struct FunTranslator {
 	std::map<actFuncPtr, std::string> fun2name;
 	std::map<std::string, actFuncPtr> name2fun;
+	std::map<actFuncPtr, std::string>::iterator f2nIterator;
+	std::map<std::string, actFuncPtr>::iterator n2fIterator;
 	
 	FunTranslator() {
 		fun2name[actFuncId] = "id";
@@ -36,14 +38,10 @@ struct FunTranslator {
 		fun2name[actFuncTanh] = "tanh";
 		name2fun["tanh"] = actFuncTanh;
 	}
-}; 
-
-extern FunTranslator funTranslator;
+} funTranslator; 
 
 // layer corresponding to its specification
 typedef std::vector<Neuron> Layer;
-
-const double learningSpeed = 0.05;
 
 class Net {
 	public:
@@ -98,9 +96,17 @@ class Net {
 			//std::cout << "Run finished with return value = " << returnValue << std::endl;
 			return returnValue;
 		}
+		
+		// FIXME not tested
+		void train(const std::vector<Image<double> > &images, double expectedValue, size_t trainingIterationCount, double learningRate = 0.05) {
+			for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
+				for (size_t imageIndex = 0; imageIndex < images.size(); ++imageIndex) {
+					trainOnce(images[imageIndex], expectedValue, learningRate);
+				}
+			}
+		}
 
-		// will call run() as one (probably the first) step
-		void train(const Image<double> &image, double expectedValue) {
+		void trainOnce(const Image<double> &image, double expectedValue, double learningRate = 0.05) {
 			//std::cout << std::endl << "Training on value " << image.getVoxel(0) << ", expecting " << expectedValue << std::endl;
 
 			// Forward propagation.
@@ -125,7 +131,7 @@ class Net {
 #if PODLE_PREDNASKY
 					double sum = 0;
 					for (size_t neuronInUpperLayerIndex = 0; neuronInUpperLayerIndex < layers[layerIndex+1].size(); ++neuronInUpperLayerIndex) {
-						sum +=   layers[layerIndex+1][neuronInUpperLayerIndex].getDelta() * layers[layerIndex+1][neuronInUpperLayerIndex].getInputWeight(neuronIndex)
+						sum += layers[layerIndex+1][neuronInUpperLayerIndex].getDelta() * layers[layerIndex+1][neuronInUpperLayerIndex].getInputWeight(neuronIndex)
 						       * layers[layerIndex+1][neuronInUpperLayerIndex].getActFunc()(layers[layerIndex+1][neuronInUpperLayerIndex].getPotential(), true);
 					}
 					layers[layerIndex][neuronIndex].setDelta(sum);
@@ -145,9 +151,9 @@ class Net {
 					for (size_t inputWeightIndex = 0; inputWeightIndex < layers[layerIndex][neuronIndex].getInputWeightsSize(); ++inputWeightIndex) {
 						double newWeight = layers[layerIndex][neuronIndex].getInputWeight(inputWeightIndex);
 						if (inputWeightIndex == 0) {
-							newWeight -= -learningSpeed * layers[layerIndex][neuronIndex].getDelta() * 1;
+							newWeight -= -learningRate * layers[layerIndex][neuronIndex].getDelta() * 1;
 						} else {
-							newWeight -= -learningSpeed * layers[layerIndex][neuronIndex].getDelta() * layers[layerIndex - 1][inputWeightIndex - 1].getValue();
+							newWeight -= -learningRate * layers[layerIndex][neuronIndex].getDelta() * layers[layerIndex - 1][inputWeightIndex - 1].getValue();
 						}
 						layers[layerIndex][neuronIndex].setInputWeight(inputWeightIndex, newWeight);
 					}
