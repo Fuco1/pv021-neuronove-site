@@ -71,10 +71,10 @@ EXAMPLES:
 		Sit pote ulozi do souboru network.dat
 	 a.exe -c 2000:id,20:tanh,1:unitstep -s network.dat
 	 	stejne jako predchozi priklad s kratkymi verzemi parametru
-	 a.exe --loadnet network.dat --savenet network.dat --train ./traindata -i 2 -x 0.1
+	 a.exe --loadnet net.dat --savenet net.dat --train ./data -i 2 -x 0.1
 	 	Nacte sit, vytrenuje a ulozi pod stejnym nazvem. Trenovaci
 		data se projdou 2x s rychlosti uceni 0,1.
-	 a.exe --loadnet network.dat --run ./realdata
+	 a.exe --loadnet net.dat --run ./realdata
 	 	nacte sit, provede vypocty nad realnymi daty
 */
 
@@ -104,13 +104,14 @@ int main(int argc, char **argv) {
 		if (c == -1)
 			break;
 
+		string item, first, second;
+		stringstream ssline, ssitem;
 		switch (c) {
 			case 'c':
-				stringstream ssline(optarg);
-				string item, first, second;
+				ssline << optarg;
 				while (getline(ssline, item, ',')) {
 					if (item.size() == 0) continue;
-					stringstream  ssitem(item);
+					ssitem << item;
 					getline(ssitem, first, ':');
 					getline(ssitem, second, ':');
 					//TODO
