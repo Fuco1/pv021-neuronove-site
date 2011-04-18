@@ -12,7 +12,7 @@
 // layer specification
 struct LayerSpec {
 	size_t neuronCnt;
-	actFuncPtr actFunc; 
+	actFuncPtr actFunc;
 
 	LayerSpec() {}
 	LayerSpec(size_t neuronCnt, actFuncPtr actFunc) {
@@ -31,14 +31,14 @@ extern struct FunTranslator {
 	std::map<std::string, actFuncPtr> name2fun;
 	std::map<actFuncPtr, std::string>::iterator f2nIterator;
 	std::map<std::string, actFuncPtr>::iterator n2fIterator;
-	
+
 	FunTranslator() {
 		fun2name[actFuncId] = "id";
 		name2fun["id"] = actFuncId;
 		fun2name[actFuncTanh] = "tanh";
 		name2fun["tanh"] = actFuncTanh;
 	}
-} funTranslator; 
+} funTranslator;
 
 // layer corresponding to its specification
 typedef std::vector<Neuron> Layer;
@@ -67,8 +67,8 @@ class Net {
 			init(netSpec);
 		}
 
-		double run(const Image<double> &image) {
-			if (image.getSize() != layers[0].size()) {
+		double run(const DataItem<double> &dataItem) {
+			if (dataItem.getSize() != layers[0].size()) {
 				std::cerr << "error: Wrong image size" << std::endl;
 				exit(1);
 			}
@@ -77,7 +77,7 @@ class Net {
 			for (size_t layerIndex = 0; layerIndex < layers.size(); ++layerIndex) {
 				for (size_t neuronIndex = 0; neuronIndex < layers[layerIndex].size(); ++neuronIndex) {
 					if (layerIndex == 0) {
-						layers[layerIndex][neuronIndex].setPotential(image.getVoxel(neuronIndex));
+						layers[layerIndex][neuronIndex].setPotential(dataItem.getData(neuronIndex));
 					} else {
 						layers[layerIndex][neuronIndex].setPotential(layers[layerIndex][neuronIndex].getInputWeight(0));
 					}
@@ -96,21 +96,21 @@ class Net {
 			//std::cout << "Run finished with return value = " << returnValue << std::endl;
 			return returnValue;
 		}
-		
+
 		// FIXME not tested
-		void train(const std::vector<Image<double> > &images, double expectedValue, size_t trainingIterationCount, double learningRate = 0.05) {
+		void train(const std::vector<DataItem<double> > &dataItems, double expectedValue, size_t trainingIterationCount, double learningRate = 0.05) {
 			for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
-				for (size_t imageIndex = 0; imageIndex < images.size(); ++imageIndex) {
-					trainOnce(images[imageIndex], expectedValue, learningRate);
+				for (size_t dataItemIndex = 0; dataItemIndex < dataItems.size(); ++dataItemIndex) {
+					trainOnce(dataItems[dataItemIndex], expectedValue, learningRate);
 				}
 			}
 		}
 
-		void trainOnce(const Image<double> &image, double expectedValue, double learningRate = 0.05) {
-			//std::cout << std::endl << "Training on value " << image.getVoxel(0) << ", expecting " << expectedValue << std::endl;
+		void trainOnce(const DataItem<double> &dataItem, double expectedValue, double learningRate = 0.05) {
+			//std::cout << std::endl << "Training on value " << dataItem.getData(0) << ", expecting " << expectedValue << std::endl;
 
 			// Forward propagation.
-			run(image);
+			run(dataItem);
 
 			// \todo Calculate the delta value for the output neuron.
 			layers[layers.size() - 1][0].setDelta(expectedValue - layers[layers.size() - 1][0].getValue());
