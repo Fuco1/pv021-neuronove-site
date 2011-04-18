@@ -101,7 +101,7 @@ void parseCmdLine(int argc, char **argv) {
 			{"run",       required_argument, 0, 'r'},
 			{0, 0, 0, 0}
 		};
-		
+
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
@@ -142,7 +142,7 @@ void parseCmdLine(int argc, char **argv) {
 				if (value1 <= 0) {
 					warning("Iteration count must be positive."
 								" Default to %i.", userOptions.iters);
-				} else {	
+				} else {
 					userOptions.iters = value1;
 				}
 				break;
@@ -151,7 +151,7 @@ void parseCmdLine(int argc, char **argv) {
 				if (value2 <= 0) {
 					warning("Learning rate must be positive."
 								" Default to %.2f.", userOptions.rate);
-				} else {	
+				} else {
 					userOptions.rate = value2;
 				}
 				break;
@@ -187,7 +187,7 @@ EXAMPLES:
 	 a.exe --createnet 2000:id,20:tanh,1:unitstep --savenet network.dat
 	 	Vytvori novou netrenovanou dvou-vrstvou sit s
 		2000 vstupnimi, 20 skrytymi, a jednim vystupnim neuronem.
-	 	Vstupni vrstva ma pridelenu identickou aktivacni funkci, 
+	 	Vstupni vrstva ma pridelenu identickou aktivacni funkci,
 		skryta ma tanh, a vystupni vrstve nalezi funkce unitstep.
 		Sit pote ulozi do souboru network.dat
 	 a.exe -c 2000:id,20:tanh,1:unitstep -s network.dat
@@ -201,7 +201,7 @@ EXAMPLES:
 
 int main(int argc, char **argv) {
 	parseCmdLine(argc, argv);
-	checkUserOptions();	
+	checkUserOptions();
 	/* PROCESSING FLOW, TODO finish and uncomment when getData() is ready
 	Net net;
 	if (userOptions.loadPath != NULL) {
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 		//check if dataSize == inputNeuronCount
 		net.train(input, input.expectedResult, userOptions.iters, userOptions.rate);
 	}
-	
+
 	if (userOptions.savePath != NULL) {
 		net.saveToFile(userOptions.savePath);
 	} else {
@@ -232,6 +232,8 @@ int main(int argc, char **argv) {
 	}
 	*/
 
+  /*
+  // Create the net.
 	std::vector<LayerSpec> netSpec;
 	netSpec.push_back(LayerSpec(1, funTranslator.name2fun["id"]));
 	netSpec.push_back(LayerSpec(2, funTranslator.name2fun["tanh"]));
@@ -255,28 +257,9 @@ int main(int argc, char **argv) {
 			net.trainOnce(examples[exampleIndex].first, examples[exampleIndex].second);
 		}
 	}
-
 	std::cout << net;
 
-	// Train.
-	double inputValue;
- 	/*
-	double expectedOutput;
-  	do {
-		std::cout << net;
-  		Image<double> input(1, 1, 1);
 
-		std::cout << "enter a value: ";
-		std::cin >> inputValue;
-  	input.setVoxel(0, inputValue);
-		std::cout << "net output: " << net.run(input) << std::endl;
-		std::cout << "enter expected output: ";
-		std::cin >> expectedOutput;
-  	input.setVoxel(0, inputValue);
-		net.trainOnce(input, expectedOutput, userOptions.rate);
-	} while (inputValue != 0);
-	std::cout << net;
- 	*/
 
 	// Test on non-training data.
 	//double inputValue;
@@ -288,7 +271,7 @@ int main(int argc, char **argv) {
 		std::cout << "value * value is " << inputValue * inputValue << std::endl;
 		std::cout << "net output is " << net.run(input) << std::endl;
 	} while (inputValue != 0);
-
+  */
 
 	return 0;
 }
