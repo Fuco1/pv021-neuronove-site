@@ -7,7 +7,6 @@
 #include "net.h"
 #include "neuron.h"
 #include "image.h"
-#include "data.h"
 
 using namespace std;
 
