@@ -7,20 +7,9 @@
 #include "net.h"
 #include "neuron.h"
 #include "image.h"
+#include "data.h"
 
 using namespace std;
-
-// Returns the vector of all filenames in the given directory
-std::vector<std::string> getFileNames(const std::string &directoryName) {
-	std::vector<std::string> fileNames;
-	#ifdef WIN_32
-	// \todo windows
-	#else
-	// \todo unix
-	#endif
-	return fileNames;
-}
-
 
 // singleton struct to save values given by user
 struct UserOptions {
@@ -176,6 +165,8 @@ void parseCmdLine(int argc, char **argv) {
 
 void checkUserOptions() {
 	UserOptions &ops = userOptions;
+	//if (ops.loadPath == NULL && ops.netSpec.size() == 0)
+	//	error("One of the options --load or --create must be specified.");
 	if (ops.loadPath != NULL && ops.netSpec.size() > 0)
 		error("--load and --create options cannot be specified together.");
 	if (ops.trainPath != NULL && ops.runPath != NULL)
@@ -204,6 +195,7 @@ int main(int argc, char **argv) {
 	checkUserOptions();
 	/* PROCESSING FLOW, TODO finish and uncomment when getData() is ready
 	Net net;
+	vector<DataItem> dataItems;
 	if (userOptions.loadPath != NULL) {
 		if (!net.loadFromFile(userOptions.loadPath))
 			error("Opening file %s failed.", userOptions.loadPath);
@@ -213,16 +205,19 @@ int main(int argc, char **argv) {
 
 	if (userOptions.runPath != NULL) {
 		// TODO
-		if (!getData(&input, RUN))
+		if (!getData(dataItems, RUN, runPath, trainPath))
 			error("Opening file %s failed.", userOptions.runPath);
-		//check if dataSize == inputNeuronCount
-		cout << net.run(input) << endl;
+		if dataSize != inputNeuronCount:
+			error
+		for dataItem in dataItems:
+			cout << net.run(dataItem) << endl;
 	} else {
 		// TODO
-		 if (!getData(&inputData, TRAIN))
+		 if (!getData(dataItems, TRAIN, runPath, trainPath))
 			error("Opening file %s failed.", userOptions.trainPath);
-		//check if dataSize == inputNeuronCount
-		net.train(input, input.expectedResult, userOptions.iters, userOptions.rate);
+		if dataSize != inputNeuronCount:
+			error
+		net.train(dataItems, userOptions.iters, userOptions.rate);
 	}
 
 	if (userOptions.savePath != NULL) {
