@@ -4,25 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-
-template <class DataType> class DataItem {
-	protected:
-		std::vector<DataType> data;
-	public:
-		// Get the value with the specific index.
-		DataType getData(size_t i) const {
-			return data[i];
-		}
-
-		// Set the value with the specific index.
-		void setData(size_t i, DataType value) {
-			data[i] = value;
-		}
-
-		size_t getSize(void) const {
-			return data.size();
-		};
-};
+#include "data.h"
 
 template <class VoxelType> class Image: public DataItem<VoxelType> {
 	private:
