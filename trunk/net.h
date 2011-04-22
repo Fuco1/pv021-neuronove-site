@@ -26,6 +26,8 @@ template <class DataType> class DataItem {
 		size_t getSize(void) const {
 			return data.size();
 		}
+		
+		virtual void loadFromFile(const std::string &fileName) { };
 };
 
 // layer specification

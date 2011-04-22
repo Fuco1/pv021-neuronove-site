@@ -4,6 +4,13 @@
 #include <cstdarg>
 #include <cstdio>
 #include <getopt.h>
+#ifdef WIN_32
+  #include <windows.h>
+  #include <tchar.h>
+#else
+  #include <dirent.h>
+  #include <errno.h>
+#endif
 #include "net.h"
 #include "neuron.h"
 #include "image.h"
@@ -172,29 +179,105 @@ void checkUserOptions() {
 		error("--run and --train options cannot be specified together.");
 }
 
-// Returns the vector of all filenames in the given directory
-std::vector<std::string> getFileNames(const std::string &directoryName) {
-        std::vector<std::string> fileNames;
-        #ifdef WIN_32
+// Returns 0 if the directory exist and we can read it, or errno otherwise
+int getFileNames(const std::string &directoryName, vector<string> &files) {
+  //std::vector<std::string> fileNames;
+#ifdef WIN_32
         // \todo windows
-        #else
+	UINT counter = 0;
+	bool working = true;
+	string buffer;
+	
+	WIN32_FIND_DATA file;
+	HANDLE myHandle = FindFirstFile(directoryName + "*.*",&file);
+	
+	if(myHandle != INVALID_HANDLE_VALUE) {
+		files.push_back(file.cFileName);
+		while(working) {
+			FindNextFile(myHandle,&file);
+			if(file.cFileName!=buffer) {
+				files.push_back(file.cFileName);
+			}
+			else {
+				//end of files reached
+				working=false;
+			}			
+		}
+		return 0;
+	}
+	else {
+		return 1;
+	}
+#else
         // \todo unix
-        #endif
-        return fileNames;
+	DIR *dp;
+	struct dirent *dirp;
+	if((dp  = opendir(directoryName.c_str())) == NULL) {
+		cerr << "Error(" << errno << ") opening " << directoryName << endl;
+		return errno;
+	}
+	
+	while ((dirp = readdir(dp)) != NULL) {
+		files.push_back(string(dirp->d_name));
+	}
+	closedir(dp);
+	return 0;	
+#endif       
 }
  
 // TODO fill dataItems with real (run) images. Data are to be found at runPath.
 // Return true if loading from files was successful, false otherwise.
 bool getRealData(vector<DataItem<double> > &dataItems, const char *runPath) {
+	vector<string> files;
+	int errno;
+	if (!(errno = getFileNames(string(runPath), files))) {
+		cerr << "Error while loading directory content. Errno: " << errno << endl;
+		return false;
+	}
+	
+	for (size_t i = 0; i < files.size(); i++) {
+		DataItem<double> item;
+		item.loadFromFile(files[i]);
+		dataItems.push_back(item);
+	}
+	
 	return true;
 }
 
 // TODO fill dataItems with training images and expectVals with expected 
 // results for these images. Data are to be found at trainPath. trainPath
-// directory is expected to contain positives and negatives directories.
+// directory is expected to contain ``positive'' and ``negative'' directories.
 // Return true if loading from files was successful, false otherwise.
 bool getTrainingData(vector<DataItem<double> > &dataItems, 
 			vector<double> &expectVals, const char *trainPath) {
+	
+	vector<string> files;
+	int errno;
+	if (!(errno = getFileNames(string(trainPath) + "/positive", files))) {
+		cerr << "Error while loading directory content. Errno: " << errno << endl;
+		return false;
+	}
+	
+	for (size_t i = 0; i < files.size(); i++) {
+		DataItem<double> item;
+		item.loadFromFile(files[i]);
+		dataItems.push_back(item);
+		expectVals.push_back(1.0);
+	}
+
+	files.clear();
+	if (!(errno = getFileNames(string(trainPath) + "/negative", files))) {
+		cerr << "Error while loading directory content. Errno: " << errno << endl;
+		return false;
+	}
+	
+	for (size_t i = 0; i < files.size(); i++) {
+		DataItem<double> item;
+		item.loadFromFile(files[i]);
+		dataItems.push_back(item);
+		expectVals.push_back(0.0);
+	}
+
 	return true;
 }
 
@@ -216,6 +299,12 @@ EXAMPLES:
 */
 
 int main(int argc, char **argv) {
+	/*vector<string> files;
+	getFileNames(".", files);
+	for (int i = 0; i < files.size(); i++) {
+		cout << files[i] << endl;
+	}
+	return 0;*/
 	parseCmdLine(argc, argv);
 	checkUserOptions();
 	
