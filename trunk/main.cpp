@@ -172,6 +172,32 @@ void checkUserOptions() {
 		error("--run and --train options cannot be specified together.");
 }
 
+// Returns the vector of all filenames in the given directory
+std::vector<std::string> getFileNames(const std::string &directoryName) {
+        std::vector<std::string> fileNames;
+        #ifdef WIN_32
+        // \todo windows
+        #else
+        // \todo unix
+        #endif
+        return fileNames;
+}
+ 
+// TODO fill dataItems with real (run) images. Data are to be found at runPath.
+// Return true if loading from files was successful, false otherwise.
+bool getRealData(vector<DataItem<double> > &dataItems, const char *runPath) {
+	return true;
+}
+
+// TODO fill dataItems with training images and expectVals with expected 
+// results for these images. Data are to be found at trainPath. trainPath
+// directory is expected to contain positives and negatives directories.
+// Return true if loading from files was successful, false otherwise.
+bool getTrainingData(vector<DataItem<double> > &dataItems, 
+			vector<double> &expectVals, const char *trainPath) {
+	return true;
+}
+
 /*
 EXAMPLES:
 	 a.exe --createnet 2000:id,20:tanh,1:unitstep --savenet network.dat
@@ -184,7 +210,7 @@ EXAMPLES:
 	 	stejne jako predchozi priklad s kratkymi verzemi parametru
 	 a.exe --loadnet net.dat --savenet net.dat --train ./data -i 2 -x 0.1
 	 	Nacte sit, vytrenuje a ulozi pod stejnym nazvem. Trenovaci
-		data se projdou 2x s rychlosti uceni 0,1.
+		data se projdou 2x s rychlosti uceni 0.1
 	 a.exe --loadnet net.dat --run ./realdata
 	 	nacte sit, provede vypocty nad realnymi daty
 */
@@ -192,39 +218,35 @@ EXAMPLES:
 int main(int argc, char **argv) {
 	parseCmdLine(argc, argv);
 	checkUserOptions();
-	/* PROCESSING FLOW, TODO finish and uncomment when getData() is ready
+	
 	Net net;
-	vector<DataItem> dataItems;
+	vector<DataItem<double> > dataItems;
+	vector<double> expectVals;
+
+	// initialize network
 	if (userOptions.loadPath != NULL) {
 		if (!net.loadFromFile(userOptions.loadPath))
 			error("Opening file %s failed.", userOptions.loadPath);
 	} else {
 		net.init(userOptions.netSpec);
 	}
-
+	// load input data and run or train network on them
 	if (userOptions.runPath != NULL) {
-		// TODO
-		if (!getData(dataItems, RUN, runPath, trainPath))
+		if (!getRealData(dataItems, userOptions.runPath))
 			error("Opening file %s failed.", userOptions.runPath);
-		if dataSize != inputNeuronCount:
-			error
-		for dataItem in dataItems:
-			cout << net.run(dataItem) << endl;
+		for (size_t i = 0; i < dataItems.size(); i++)
+			cout << net.run(dataItems[i]) << endl;
 	} else {
-		// TODO
-		 if (!getData(dataItems, TRAIN, runPath, trainPath))
+		 if (!getTrainingData(dataItems, expectVals, userOptions.trainPath))
 			error("Opening file %s failed.", userOptions.trainPath);
-		if dataSize != inputNeuronCount:
-			error
-		net.train(dataItems, userOptions.iters, userOptions.rate);
+		net.train(dataItems, expectVals, userOptions.iters, userOptions.rate);
 	}
-
+	// save the network to a file
 	if (userOptions.savePath != NULL) {
 		net.saveToFile(userOptions.savePath);
 	} else {
 		cout << net;
 	}
-	*/
 
   /*
   // Create the net.
