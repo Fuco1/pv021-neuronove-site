@@ -9,6 +9,25 @@
 #include "neuron.h"
 #include "image.h"
 
+template <class DataType> class DataItem {
+	protected:
+		std::vector<DataType> data;
+	public:
+		// Get the value with the specific index.
+		DataType getData(size_t i) const {
+			return data[i];
+		}
+
+		// Set the value with the specific index.
+		void setData(size_t i, DataType value) {
+			data[i] = value;
+		}
+
+		size_t getSize(void) const {
+			return data.size();
+		}
+};
+
 // layer specification
 struct LayerSpec {
 	size_t neuronCnt;
@@ -98,10 +117,10 @@ class Net {
 		}
 
 		// FIXME not tested
-		void train(const std::vector<DataItem<double> > &dataItems, double expectedValue, size_t trainingIterationCount, double learningRate = 0.05) {
+		void train(const std::vector<DataItem<double> > &dataItems, std::vector<double> expectedValues, size_t trainingIterationCount, double learningRate = 0.05) {
 			for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
 				for (size_t dataItemIndex = 0; dataItemIndex < dataItems.size(); ++dataItemIndex) {
-					trainOnce(dataItems[dataItemIndex], expectedValue, learningRate);
+					trainOnce(dataItems[dataItemIndex], expectedValues[dataItemIndex], learningRate);
 				}
 			}
 		}
