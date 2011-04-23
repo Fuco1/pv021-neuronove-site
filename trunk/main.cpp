@@ -187,10 +187,10 @@ int getFileNames(const std::string &directoryName, vector<string> &files) {
 	UINT counter = 0;
 	bool working = true;
 	string buffer;
-	
+
 	WIN32_FIND_DATA file;
 	HANDLE myHandle = FindFirstFile(directoryName + "*.*",&file);
-	
+
 	if(myHandle != INVALID_HANDLE_VALUE) {
 		files.push_back(file.cFileName);
 		while(working) {
@@ -201,7 +201,7 @@ int getFileNames(const std::string &directoryName, vector<string> &files) {
 			else {
 				//end of files reached
 				working=false;
-			}			
+			}
 		}
 		return 0;
 	}
@@ -216,48 +216,48 @@ int getFileNames(const std::string &directoryName, vector<string> &files) {
 		cerr << "Error(" << errno << ") opening " << directoryName << endl;
 		return errno;
 	}
-	
+
 	while ((dirp = readdir(dp)) != NULL) {
 		files.push_back(string(dirp->d_name));
 	}
 	closedir(dp);
-	return 0;	
-#endif       
+	return 0;
+#endif
 }
- 
+
 // TODO fill dataItems with real (run) images. Data are to be found at runPath.
 // Return true if loading from files was successful, false otherwise.
 bool getRealData(vector<DataItem<double> > &dataItems, const char *runPath) {
 	vector<string> files;
-	int errno;
-	if (!(errno = getFileNames(string(runPath), files))) {
-		cerr << "Error while loading directory content. Errno: " << errno << endl;
+	int err;
+	if (!(err = getFileNames(string(runPath), files))) {
+		cerr << "Error while loading directory content. Errno: " << err << endl;
 		return false;
 	}
-	
+
 	for (size_t i = 0; i < files.size(); i++) {
 		DataItem<double> item;
 		item.loadFromFile(files[i]);
 		dataItems.push_back(item);
 	}
-	
+
 	return true;
 }
 
-// TODO fill dataItems with training images and expectVals with expected 
+// TODO fill dataItems with training images and expectVals with expected
 // results for these images. Data are to be found at trainPath. trainPath
 // directory is expected to contain ``positive'' and ``negative'' directories.
 // Return true if loading from files was successful, false otherwise.
-bool getTrainingData(vector<DataItem<double> > &dataItems, 
+bool getTrainingData(vector<DataItem<double> > &dataItems,
 			vector<double> &expectVals, const char *trainPath) {
-	
+
 	vector<string> files;
-	int errno;
-	if (!(errno = getFileNames(string(trainPath) + "/positive", files))) {
-		cerr << "Error while loading directory content. Errno: " << errno << endl;
+	int err;
+	if (!(err = getFileNames(string(trainPath) + "/positive", files))) {
+		cerr << "Error while loading directory content. Errno: " << err << endl;
 		return false;
 	}
-	
+
 	for (size_t i = 0; i < files.size(); i++) {
 		DataItem<double> item;
 		item.loadFromFile(files[i]);
@@ -266,11 +266,11 @@ bool getTrainingData(vector<DataItem<double> > &dataItems,
 	}
 
 	files.clear();
-	if (!(errno = getFileNames(string(trainPath) + "/negative", files))) {
-		cerr << "Error while loading directory content. Errno: " << errno << endl;
+	if (!(err = getFileNames(string(trainPath) + "/negative", files))) {
+		cerr << "Error while loading directory content. Errno: " << err << endl;
 		return false;
 	}
-	
+
 	for (size_t i = 0; i < files.size(); i++) {
 		DataItem<double> item;
 		item.loadFromFile(files[i]);
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
 	return 0;*/
 	parseCmdLine(argc, argv);
 	checkUserOptions();
-	
+
 	Net net;
 	vector<DataItem<double> > dataItems;
 	vector<double> expectVals;
