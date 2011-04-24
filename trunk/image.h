@@ -63,10 +63,13 @@ template <class VoxelType> class Image: public DataItem<VoxelType> {
 			setData(x + getWidth() * y + getWidth() * getHeight() * z, value);
 		}
 
-
 		// \todo Load the image from a fie.
 		void loadFromFile(const std::string &fileName) {
-			std::ifstream input(fileName);
+			std::ifstream input(fileName.c_str());
+			if (input.fail()) {
+				std::cerr << "Error: Could not read " << fileName << std::endl;
+				exit(1);
+			}
 
 			input >> this->width;
 			input >> this->height;
