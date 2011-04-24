@@ -172,11 +172,13 @@ void parseCmdLine(int argc, char **argv) {
 void checkUserOptions() {
 	UserOptions &ops = userOptions;
 	//if (ops.loadPath == NULL && ops.netSpec.size() == 0)
-	//	error("One of the options --load or --create must be specified.");
+	//	error("Exactly one of the options --load or --create must be specified.");
 	if (ops.loadPath != NULL && ops.netSpec.size() > 0)
 		error("--load and --create options cannot be specified together.");
-	if (ops.trainPath != NULL && ops.runPath != NULL)
-		error("--run and --train options cannot be specified together.");
+	//if (ops.trainPath == NULL && ops.runPath == NULL)
+	//	error("One of the options --run or --train must be specified.");
+	//if (ops.trainPath != NULL && ops.runPath != NULL)
+	//	error("--run and --train options cannot be specified together.");
 }
 
 // Returns 0 if the directory exist and we can read it, or errno otherwise
@@ -209,72 +211,76 @@ int getFileNames(const std::string &directoryName, vector<string> &files) {
 		return 1;
 	}
 #else
-        // \todo unix
 	DIR *dp;
 	struct dirent *dirp;
-	if((dp  = opendir(directoryName.c_str())) == NULL) {
+	if ((dp = opendir(directoryName.c_str())) == NULL) {
 		cerr << "Error(" << errno << ") opening " << directoryName << endl;
 		return errno;
 	}
 
 	while ((dirp = readdir(dp)) != NULL) {
-		files.push_back(string(dirp->d_name));
+		string filename = string(dirp->d_name);
+		if (filename != "." && filename != "..")
+			files.push_back(filename);
 	}
 	closedir(dp);
 	return 0;
 #endif
 }
 
-// TODO fill dataItems with real (run) images. Data are to be found at runPath.
+// Fill dataItems with real (run) images. Data are to be found at runPath.
 // Return true if loading from files was successful, false otherwise.
 bool getRealData(vector<DataItem<double> > &dataItems, const char *runPath) {
 	vector<string> files;
-	int err;
-	if (!(err = getFileNames(string(runPath), files))) {
-		cerr << "Error while loading directory content. Errno: " << err << endl;
+	int errno;
+	string path = string(runPath) + "/";
+	if ((errno = getFileNames(path, files))) {
+		//cerr << "Error while loading directory content. Errno: " << errno << endl;
 		return false;
 	}
 
 	for (size_t i = 0; i < files.size(); i++) {
-		DataItem<double> item;
-		item.loadFromFile(files[i]);
-		dataItems.push_back(item);
+		Image<double> image(path + files[i]);
+		//cerr << "Loading file: " << path + files[i] << endl; //info
+		dataItems.push_back(image);
 	}
 
 	return true;
 }
 
-// TODO fill dataItems with training images and expectVals with expected
+// Fill dataItems with training images and expectVals with expected 
 // results for these images. Data are to be found at trainPath. trainPath
-// directory is expected to contain ``positive'' and ``negative'' directories.
+// directory is expected to contain ``Positive'' and ``Negative'' directories.
 // Return true if loading from files was successful, false otherwise.
 bool getTrainingData(vector<DataItem<double> > &dataItems,
 			vector<double> &expectVals, const char *trainPath) {
 
 	vector<string> files;
-	int err;
-	if (!(err = getFileNames(string(trainPath) + "/positive", files))) {
-		cerr << "Error while loading directory content. Errno: " << err << endl;
+	int errno;
+	string path = string(trainPath) + "/Positive/";
+	if ((errno = getFileNames(path, files))) {
+		//cerr << "Error while loading directory content. Errno: " << errno << endl;
 		return false;
 	}
 
 	for (size_t i = 0; i < files.size(); i++) {
-		DataItem<double> item;
-		item.loadFromFile(files[i]);
-		dataItems.push_back(item);
+		Image<double> image(path + files[i]);
+		//cerr << "Loading file: " << path + files[i] << endl; // info
+		dataItems.push_back(image);
 		expectVals.push_back(1.0);
 	}
 
 	files.clear();
-	if (!(err = getFileNames(string(trainPath) + "/negative", files))) {
-		cerr << "Error while loading directory content. Errno: " << err << endl;
+	path = string(trainPath) + "/Negative/";
+	if ((errno = getFileNames(path, files))) {
+		//cerr << "Error while loading directory content. Errno: " << errno << endl;
 		return false;
 	}
 
 	for (size_t i = 0; i < files.size(); i++) {
-		DataItem<double> item;
-		item.loadFromFile(files[i]);
-		dataItems.push_back(item);
+		Image<double> image(path + files[i]);
+		//cerr << "Loading file: " << path + files[i] << endl; // info
+		dataItems.push_back(image);
 		expectVals.push_back(0.0);
 	}
 
@@ -299,12 +305,6 @@ EXAMPLES:
 */
 
 int main(int argc, char **argv) {
-	/*vector<string> files;
-	getFileNames(".", files);
-	for (int i = 0; i < files.size(); i++) {
-		cout << files[i] << endl;
-	}
-	return 0;*/
 	parseCmdLine(argc, argv);
 	checkUserOptions();
 
@@ -314,31 +314,40 @@ int main(int argc, char **argv) {
 
 	// initialize network
 	if (userOptions.loadPath != NULL) {
+		cerr << "Loading network..." << endl;
 		if (!net.loadFromFile(userOptions.loadPath))
 			error("Opening file %s failed.", userOptions.loadPath);
 	} else {
+		cerr << "Creating network..." << endl;
 		net.init(userOptions.netSpec);
 	}
 	// load input data and run or train network on them
+	if (userOptions.trainPath != NULL) {
+		cerr << "Loading data..." << endl;
+		if (!getTrainingData(dataItems, expectVals, userOptions.trainPath))
+			error("Error reading directory %s", userOptions.trainPath);
+		cerr << "Training..." << endl;
+		net.train(dataItems, expectVals, userOptions.iters);
+	}
+	dataItems.clear();
 	if (userOptions.runPath != NULL) {
+		cerr << "Loading data..." << endl;
 		if (!getRealData(dataItems, userOptions.runPath))
-			error("Opening file %s failed.", userOptions.runPath);
+			error("Error reading directory %s", userOptions.runPath);
+		cerr << "Running..." << endl; // info
 		for (size_t i = 0; i < dataItems.size(); i++)
 			cout << net.run(dataItems[i]) << endl;
-	} else {
-		 if (!getTrainingData(dataItems, expectVals, userOptions.trainPath))
-			error("Opening file %s failed.", userOptions.trainPath);
-		net.train(dataItems, expectVals, userOptions.iters, userOptions.rate);
 	}
 	// save the network to a file
 	if (userOptions.savePath != NULL) {
+		cerr << "Saving network..." << endl;
 		net.saveToFile(userOptions.savePath);
 	} else {
-		cout << net;
+		//cout << net;
 	}
 
-  /*
-  // Create the net.
+	/*
+  	// Create the net.
 	std::vector<LayerSpec> netSpec;
 	netSpec.push_back(LayerSpec(1, funTranslator.name2fun["id"]));
 	netSpec.push_back(LayerSpec(2, funTranslator.name2fun["tanh"]));
@@ -364,8 +373,6 @@ int main(int argc, char **argv) {
 	}
 	std::cout << net;
 
-
-
 	// Test on non-training data.
 	//double inputValue;
 	do {
@@ -376,7 +383,7 @@ int main(int argc, char **argv) {
 		std::cout << "value * value is " << inputValue * inputValue << std::endl;
 		std::cout << "net output is " << net.run(input) << std::endl;
 	} while (inputValue != 0);
-  */
+ 	*/
 
 	return 0;
 }
