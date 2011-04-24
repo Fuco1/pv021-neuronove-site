@@ -26,8 +26,8 @@ template <class DataType> class DataItem {
 		size_t getSize(void) const {
 			return data.size();
 		}
-		
-		virtual void loadFromFile(const std::string &fileName) { };
+
+		//virtual void loadFromFile(const std::string &fileName);
 };
 
 // layer specification
@@ -90,7 +90,7 @@ class Net {
 
 		double run(const DataItem<double> &dataItem) {
 			if (dataItem.getSize() != layers[0].size()) {
-				std::cerr << "error: Wrong image size" << std::endl;
+				std::cerr << "error: Wrong image size: " << dataItem.getSize() << std::endl;
 				exit(1);
 			}
 
@@ -118,8 +118,7 @@ class Net {
 			return returnValue;
 		}
 
-		// FIXME not tested
-		void train(const std::vector<DataItem<double> > &dataItems, std::vector<double> expectedValues, size_t trainingIterationCount, double learningRate = 0.05) {
+		void train(const std::vector<DataItem<double> > &dataItems, const std::vector<double> &expectedValues, size_t trainingIterationCount, double learningRate = 0.05) {
 			for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
 				for (size_t dataItemIndex = 0; dataItemIndex < dataItems.size(); ++dataItemIndex) {
 					trainOnce(dataItems[dataItemIndex], expectedValues[dataItemIndex], learningRate);
@@ -128,8 +127,6 @@ class Net {
 		}
 
 		void trainOnce(const DataItem<double> &dataItem, double expectedValue, double learningRate = 0.05) {
-			//std::cout << std::endl << "Training on value " << dataItem.getData(0) << ", expecting " << expectedValue << std::endl;
-
 			// Forward propagation.
 			run(dataItem);
 
@@ -149,7 +146,7 @@ class Net {
 //
 //       (Pokud bude nalezena odpoved, tenhle komentar prosim nemazat, ale doplnit o strucne zduvodneni/vysvetleni.)
 #undef PODLE_PREDNASKY
-#if PODLE_PREDNASKY
+#ifdef PODLE_PREDNASKY
 					double sum = 0;
 					for (size_t neuronInUpperLayerIndex = 0; neuronInUpperLayerIndex < layers[layerIndex+1].size(); ++neuronInUpperLayerIndex) {
 						sum += layers[layerIndex+1][neuronInUpperLayerIndex].getDelta() * layers[layerIndex+1][neuronInUpperLayerIndex].getInputWeight(neuronIndex)
@@ -182,9 +179,9 @@ class Net {
 			}
 		}
 
-		void saveToFile(const char* fileName);
+		void saveToFile(const char *fileName);
 
-		bool loadFromFile(const char* fileName);
+		bool loadFromFile(const char *fileName);
 };
 
 
