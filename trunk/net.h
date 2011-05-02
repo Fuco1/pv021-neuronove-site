@@ -12,6 +12,7 @@
 template <class DataType> class DataItem {
 	protected:
 		std::vector<DataType> data;
+		std::string fileName;
 	public:
 		// Get the value with the specific index.
 		DataType getData(size_t i) const {
@@ -21,6 +22,10 @@ template <class DataType> class DataItem {
 		// Set the value with the specific index.
 		void setData(size_t i, DataType value) {
 			data[i] = value;
+		}
+
+		std::string& getFileName() {
+			return this->fileName;
 		}
 
 		size_t getSize(void) const {
@@ -118,7 +123,7 @@ class Net {
 			return returnValue;
 		}
 
-		void train(const std::vector<DataItem<double> > &dataItems, const std::vector<double> &expectedValues, size_t trainingIterationCount, double learningRate = 0.05) {
+		void train(const std::vector<DataItem<double> > &dataItems, const std::vector<double> &expectedValues, size_t trainingIterationCount, double learningRate) {
 			for (size_t trainingIteration = 0; trainingIteration < trainingIterationCount; ++trainingIteration) {
 				for (size_t dataItemIndex = 0; dataItemIndex < dataItems.size(); ++dataItemIndex) {
 					trainOnce(dataItems[dataItemIndex], expectedValues[dataItemIndex], learningRate);
@@ -126,7 +131,7 @@ class Net {
 			}
 		}
 
-		void trainOnce(const DataItem<double> &dataItem, double expectedValue, double learningRate = 0.05) {
+		void trainOnce(const DataItem<double> &dataItem, double expectedValue, double learningRate) {
 			// Forward propagation.
 			run(dataItem);
 

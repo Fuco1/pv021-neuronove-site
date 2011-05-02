@@ -281,7 +281,7 @@ bool getTrainingData(vector<DataItem<double> > &dataItems,
 		Image<double> image(path + files[i]);
 		//cerr << "Loading file: " << path + files[i] << endl; // info
 		dataItems.push_back(image);
-		expectVals.push_back(0.0);
+		expectVals.push_back(-1.0);
 	}
 
 	return true;
@@ -327,7 +327,7 @@ int main(int argc, char **argv) {
 		if (!getTrainingData(dataItems, expectVals, userOptions.trainPath))
 			error("Error reading directory %s", userOptions.trainPath);
 		cerr << "Training..." << endl;
-		net.train(dataItems, expectVals, userOptions.iters);
+		net.train(dataItems, expectVals, userOptions.iters, userOptions.rate);
 	}
 	dataItems.clear();
 	if (userOptions.runPath != NULL) {
@@ -336,7 +336,7 @@ int main(int argc, char **argv) {
 			error("Error reading directory %s", userOptions.runPath);
 		cerr << "Running..." << endl; // info
 		for (size_t i = 0; i < dataItems.size(); i++)
-			cout << net.run(dataItems[i]) << endl;
+			cout << dataItems[i].getFileName() << ": " << net.run(dataItems[i]) << endl;
 	}
 	// save the network to a file
 	if (userOptions.savePath != NULL) {
