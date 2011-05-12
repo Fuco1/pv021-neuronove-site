@@ -250,14 +250,14 @@ bool getRealData(vector<DataItem<double> > &dataItems, const char *runPath) {
 
 // Fill dataItems with training images and expectVals with expected 
 // results for these images. Data are to be found at trainPath. trainPath
-// directory is expected to contain ``Positive'' and ``Negative'' directories.
+// directory is expected to contain ``pos'' and ``neg'' directories.
 // Return true if loading from files was successful, false otherwise.
 bool getTrainingData(vector<DataItem<double> > &dataItems,
 			vector<double> &expectVals, const char *trainPath) {
 
 	vector<string> files;
 	int errno;
-	string path = string(trainPath) + "/Positive/";
+	string path = string(trainPath) + "/pos/";
 	if ((errno = getFileNames(path, files))) {
 		//cerr << "Error while loading directory content. Errno: " << errno << endl;
 		return false;
@@ -271,7 +271,7 @@ bool getTrainingData(vector<DataItem<double> > &dataItems,
 	}
 
 	files.clear();
-	path = string(trainPath) + "/Negative/";
+	path = string(trainPath) + "/neg/";
 	if ((errno = getFileNames(path, files))) {
 		//cerr << "Error while loading directory content. Errno: " << errno << endl;
 		return false;
